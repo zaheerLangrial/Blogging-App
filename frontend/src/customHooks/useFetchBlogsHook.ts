@@ -3,12 +3,13 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 
-interface Product_Type {
+export interface Product_Type {
     id: number;
     name: string;
     description: string;
     image: string;
     author: number;
+    author_name: string;
 }
 
 

@@ -1,16 +1,22 @@
+'use client'
+import useAuth from "@/customHooks/useAuth";
 import Link from "next/link";
-import { Button } from "antd";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
+    const { isAuthenticated } = useAuth()
+    const router = useRouter()
+
+
+    const handleLogout = () => {
+        localStorage.removeItem('token')
+        router.push('/')
+        window.location.reload()
+    }
 
     return (
         <nav className="bg-black text-white py-4 shadow-lg sticky top-0 z-10">
             <div className="container mx-auto flex justify-between items-center px-4">
-                {/* Logo */}
-                {/* <Link href="/" className="text-2xl font-bold tracking-wide hover:text-gray-300">
-          Blogzee
-        </Link> */}
-
                 <Link
                     href="/"
                     className="relative inline-block text-2xl font-bold tracking-wide text-white hover:scale-110 hover:rotate-3 transition-transform"
@@ -23,21 +29,21 @@ export default function Navbar() {
 
                 {/* Links */}
                 <div className="flex items-center space-x-6">
-                    <Link href="/about">
-                        <Button type="link" className="text-white hover:text-gray-300">
-                            About
-                        </Button>
+                    <Link href="/about" className="text-white hover:text-sky-300">
+                        About
                     </Link>
-                    <Link href="/blogs">
-                        <Button type="link" className="text-white hover:text-gray-300">
-                            Blogs
-                        </Button>
+                    <Link href="/blogs" className="text-white hover:text-sky-300">
+                        Blogs
                     </Link>
-                    <Link href="/contact">
-                        <Button type="link" className="text-white hover:text-gray-300">
-                            Contact
-                        </Button>
-                    </Link>
+                    {
+                        isAuthenticated ? <button onClick={handleLogout} className="text-white hover:text-sky-300">
+                            Logout
+                        </button> :
+                            <Link href="/login" className="text-white hover:text-sky-300">
+                                Login
+                            </Link>
+                    }
+
                 </div>
             </div>
         </nav>

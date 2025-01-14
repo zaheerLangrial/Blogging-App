@@ -1,5 +1,5 @@
-from .models import User_Auth, Product
-from .serializers import UserSerializer, ProductSerializer
+from .models import User_Auth, Product, Like
+from .serializers import UserSerializer, ProductSerializer, LikeSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -57,6 +57,25 @@ class Login_in(APIView):
                 {"error": "Invalid username or password."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
+            
+            
+class Logout(APIView):
+    permission_classes = [IsAuthenticated] 
+
+    def post(self, request):
+        try:
+            # Get the refresh token from the request
+            refresh_token = request.data.get("refresh_token")
+            if not refresh_token:
+                return Response({"error": "Refresh token is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Blacklist the refresh token
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response({"success": True, "message": "Logged out successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": "Invalid token or an error occurred."}, status=status.HTTP_400_BAD_REQUEST)
 # -----------------------------------------------------------------------------------------
 
 
@@ -66,6 +85,19 @@ class Get_Products (APIView) :
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+class Get_Product (APIView) : 
+    permission_classes = [AllowAny]
+    
+    def get (self, request, id) : 
+        try:
+            product = Product.objects.get(id=id)
+            serializer = ProductSerializer(product, many=False)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Product.DoesNotExist : 
+            return Response({'error': "Product does not exist!"}, status=status.HTTP_400_BAD_REQUEST)
+
     
     
     
@@ -114,4 +146,48 @@ class Delete_Product (APIView) :
         return Response({"message": "Product delete Successfully"})
                 
                 
+# -----------------------------------------------------------------------------------------
+
+class Like_Toggle (APIView) : 
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    def get(self, request, id) : 
+        user = request.user
+        print("user===>", user)
+        try: 
+            product = Product.objects.get(id=id)
+        except Product.DoesNotExist: 
+            return Response({"error": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        like, created = Like.objects.get_or_create(product=product)
+        print('like', like)
+        
+        
+        print('like.users.all', like.users.all())
+        if user in like.users.all() :
+            
+            like.users.remove(user) 
+            
+            return Response({"message": "Unliked the product."}, status=status.HTTP_200_OK)
+        else: 
+             # User hasn't liked this product yet, so we like it
+            like.users.add(user)
+            return Response({"message": "Liked the product."}, status=status.HTTP_200_OK)
+        
+        
+        
+class Get_Likes (APIView) : 
+    permission_classes = [AllowAny]
+    def get (self, request, id) : 
+        try:
+            like_obj = Like.objects.get(product=id) 
+            # total_likes = like_obj.users.count()
+            # response_Data = {
+            #     "product_id" : like_obj.product.id,
+            #     "totalLikes" :  total_likes
+            # }
+            serializer = LikeSerializer(like_obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Like.DoesNotExist : 
+            return Response({'error': "Likes doest not exist!"})
         

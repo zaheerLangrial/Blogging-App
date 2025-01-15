@@ -43,3 +43,15 @@ class Like (models.Model) :
         return self.product.name
     
     
+    
+class Comment (models.Model) : 
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(User_Auth, on_delete=models.CASCADE) 
+    text = models.CharField(max_length=300)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    
+    def __str__(self):
+        return f'Comment by {self.user.username} on {self.product.name}'
+    
+    

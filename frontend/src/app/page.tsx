@@ -46,7 +46,7 @@ export default function Home() {
 
               {/* Blog Content */}
               <Link className="p-4" href={`/${blog.id}`}>
-                <h2 className="text-lg font-semibold truncate">{blog.name}</h2>
+                <h2 className="text-lg text-gray-700 font-semibold truncate">{blog.name}</h2>
                 <p className="text-gray-600 text-sm mt-2 line-clamp-1">
                   {blog.description}
                 </p>

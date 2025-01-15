@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
     const { login, loading, error } = useLogin();
-    const { isAuthenticated } = useAuth()
+    const { isAuthenticated } = useAuth();
     const router = useRouter();
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -13,9 +13,8 @@ export default function LoginPage() {
         const form = e.target as HTMLFormElement;
         const username = form.username.value;
         const password = form.password.value;
-        login(username, password)
+        login(username, password);
     };
-
 
     if (isAuthenticated) {
         return (
@@ -84,6 +83,19 @@ export default function LoginPage() {
                         {loading ? "Logging in..." : "Login"}
                     </button>
                 </form>
+
+                {/* Signup navigation */}
+                <div className="mt-6 text-center">
+                    <p className="text-gray-400">
+                        Don't have an account?{" "}
+                        <button
+                            onClick={() => router.push("/signup")} // Navigate to the signup page
+                            className="text-blue-500 hover:underline"
+                        >
+                            Sign up
+                        </button>
+                    </p>
+                </div>
             </div>
         </div>
     );

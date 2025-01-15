@@ -1,4 +1,4 @@
-from .models import User_Auth, Product, Like
+from .models import User_Auth, Product, Like, Comment
 from rest_framework import serializers
 
 
@@ -23,3 +23,9 @@ class LikeSerializer (serializers.ModelSerializer) :
     class Meta : 
         model = Like
         fields = '__all__'
+        
+        
+class CommentSerializer (serializers.ModelSerializer) : 
+    class Meta : 
+        model = Comment
+        fields = ['id', 'user', 'product', 'text', 'created_at']

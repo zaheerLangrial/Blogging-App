@@ -1,5 +1,5 @@
-from .models import User_Auth, Product, Like
-from .serializers import UserSerializer, ProductSerializer, LikeSerializer
+from .models import User_Auth, Product, Like, Comment
+from .serializers import UserSerializer, ProductSerializer, LikeSerializer, CommentSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -105,7 +105,6 @@ class Add_Product (APIView) :
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     def post (self, request) : 
-        print(f"User ID: {request.user.id}")  
         product = request.data
         product['author'] = request.user.id
         serializer = ProductSerializer(data=product)
@@ -153,17 +152,13 @@ class Like_Toggle (APIView) :
     authentication_classes = [JWTAuthentication]
     def get(self, request, id) : 
         user = request.user
-        print("user===>", user)
         try: 
             product = Product.objects.get(id=id)
         except Product.DoesNotExist: 
             return Response({"error": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
         
         like, created = Like.objects.get_or_create(product=product)
-        print('like', like)
         
-        
-        print('like.users.all', like.users.all())
         if user in like.users.all() :
             
             like.users.remove(user) 
@@ -190,4 +185,37 @@ class Get_Likes (APIView) :
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Like.DoesNotExist : 
             return Response({'error': "Likes doest not exist!"})
+        
+        
+        
+class Get_Comments (APIView) : 
+    permission_classes = [AllowAny]
+    
+    def get(self, request, id) : 
+        comments = Comment.objects.filter(product=id) 
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        
+class Create_Comment (APIView) : 
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    def post(self, request, id):
+        # Create a new comment
+        data = {
+            "product": id,
+            "user": request.user.id,  # Pass the user ID
+            "text": request.data.get("text"),
+        }
+
+        serializer = CommentSerializer(data=data)  # Pass the data, not a dictionary
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        
         

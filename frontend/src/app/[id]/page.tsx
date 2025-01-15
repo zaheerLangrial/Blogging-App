@@ -5,7 +5,7 @@ import { FaThumbsUp } from 'react-icons/fa';
 
 const BlogDetails = ({ params }: { params: { id: string } }) => {
     const { id } = params;
-    const { loading, error, blog, totalLikes, handleLikes } = useBlog(id);
+    const { loading, error, blog, totalLikes, comments, newComment, setNewComment, handleLikes, handleCommentSubmit } = useBlog(id);
 
     if (loading) {
         return <div>Loading...</div>;
@@ -39,6 +39,38 @@ const BlogDetails = ({ params }: { params: { id: string } }) => {
                         <FaThumbsUp />
                         {totalLikes > 0 && <span>({totalLikes})</span>}
                     </button>
+                </div>
+            </div>
+
+            {/* Comment Section */}
+            <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Comments</h2>
+                <div className="mb-4">
+                    <textarea
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Write a comment..."
+                        className="w-full p-2 border border-gray-300 text-gray-600 rounded-md"
+                    />
+                    <button
+                        onClick={handleCommentSubmit}
+                        className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md"
+                    >
+                        Post Comment
+                    </button>
+                </div>
+
+                {/* Display Comments */}
+                <div>
+                    {comments.length === 0 ? (
+                        <p>No comments yet.</p>
+                    ) : (
+                        comments.map((comment) => (
+                            <div key={comment.id} className="border-b border-gray-300 pb-4 mb-4">
+                                <p>{comment.text}</p>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>
